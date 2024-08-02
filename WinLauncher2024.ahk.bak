@@ -1,0 +1,326 @@
+﻿#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+; #Warn  ; Enable warnings to assist with detecting common errors.
+SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+#SingleInstance, Force
+; #NoTrayIcon
+#Persistent
+
+
+
+
+GLOBAL CONFIGFile := "winlauncher.cfg"
+GLOBAL AppTitleRoot := "WinLauncher 2024"
+Menu, Tray, Tip, %AppTitleRoot%
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;  
+;;;;  
+IniRead, AppSwitch001, %A_ScriptDir%\%CONFIGFile%, SWITCHES, App001, 1
+GLOBAL AppSwitchx01 := AppSwitch001
+;;;;  
+IniRead, AppSwitch002, %A_ScriptDir%\%CONFIGFile%, SWITCHES, App002, 1
+GLOBAL AppSwitchx02 := AppSwitch002
+;;;;  
+IniRead, AppSwitch003, %A_ScriptDir%\%CONFIGFile%, SWITCHES, App003, 1
+GLOBAL AppSwitchx03 := AppSwitch003
+;;;;  
+IniRead, AppSwitch004, %A_ScriptDir%\%CONFIGFile%, SWITCHES, App004, 1
+GLOBAL AppSwitchx04 := AppSwitch004
+;;;;  
+IniRead, AppSwitch005, %A_ScriptDir%\%CONFIGFile%, SWITCHES, App005, 1
+GLOBAL AppSwitchx05 := AppSwitch005
+;;;;  
+IniRead, AppSwitch006, %A_ScriptDir%\%CONFIGFile%, SWITCHES, App006, 1
+GLOBAL AppSwitchx06 := AppSwitch006
+;;;;  
+IniRead, AppSwitch007, %A_ScriptDir%\%CONFIGFile%, SWITCHES, App007, 1
+GLOBAL AppSwitchx07 := AppSwitch007
+;;;;  
+IniRead, AppSwitch008, %A_ScriptDir%\%CONFIGFile%, SWITCHES, App008, 1
+GLOBAL AppSwitchx08 := AppSwitch008
+;;;;  
+IniRead, AppSwitch009, %A_ScriptDir%\%CONFIGFile%, SWITCHES, App009, 1
+GLOBAL AppSwitchx09 := AppSwitch009
+;;;;  
+IniRead, AppSwitch010, %A_ScriptDir%\%CONFIGFile%, SWITCHES, App010, 1
+GLOBAL AppSwitchx10 := AppSwitch010
+;;;;  
+;;;;  
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;  
+;;;;  
+IniRead, AppDir001, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherDirectory001, UNDEFINED_001
+GLOBAL AppDIRx01 := AppDir001
+IniRead, AppExe001, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherExecutable001, UNDEFINED_001
+GLOBAL AppEXEx01 := AppExe001
+;;;;  
+;;;;  
+IniRead, AppDir002, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherDirectory002, UNDEFINED_002
+GLOBAL AppDIRx02 := AppDir002
+IniRead, AppExe002, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherExecutable002, UNDEFINED_002
+GLOBAL AppEXEx02 := AppExe002
+;;;;  
+;;;;  
+IniRead, AppDir003, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherDirectory003, UNDEFINED_003
+GLOBAL AppDIRx03 := AppDir003
+IniRead, AppExe003, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherExecutable003, UNDEFINED_003
+GLOBAL AppEXEx03 := AppExe003
+;;;;  
+;;;;  
+IniRead, AppDir004, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherDirectory004, UNDEFINED_004
+GLOBAL AppDIRx04 := AppDir004
+IniRead, AppExe004, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherExecutable004, UNDEFINED_004
+GLOBAL AppEXEx04 := AppExe004
+;;;;  
+;;;;  
+IniRead, AppDir005, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherDirectory005, UNDEFINED_005
+GLOBAL AppDIRx05 := AppDir005
+IniRead, AppExe005, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherExecutable005, UNDEFINED_005
+GLOBAL AppEXEx05 := AppExe005
+;;;;  
+;;;;  
+IniRead, AppDir006, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherDirectory006, UNDEFINED_006
+GLOBAL AppDIRx06 := AppDir006
+IniRead, AppExe006, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherExecutable006, UNDEFINED_006
+GLOBAL AppEXEx06 := AppExe001
+;;;;  
+;;;;  
+IniRead, AppDir007, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherDirectory007, UNDEFINED_007
+GLOBAL AppDIRx07 := AppDir007
+IniRead, AppExe007, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherExecutable007, UNDEFINED_007
+GLOBAL AppEXEx07 := AppExe007
+;;;;  
+;;;;  
+IniRead, AppDir008, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherDirectory008, UNDEFINED_008
+GLOBAL AppDIRx08 := AppDir008
+IniRead, AppExe008, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherExecutable008, UNDEFINED_008
+GLOBAL AppEXEx08 := AppExe008
+;;;;  
+;;;;  
+IniRead, AppDir009, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherDirectory009, UNDEFINED_009
+GLOBAL AppDIRx09 := AppDir009
+IniRead, AppExe009, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherExecutable009, UNDEFINED_009
+GLOBAL AppEXEx09 := AppExe009
+;;;;  
+;;;;  
+IniRead, AppDir010, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherDirectory010, UNDEFINED_010
+GLOBAL AppDIRx10 := AppDir010
+IniRead, AppExe010, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherExecutable010, UNDEFINED_010
+GLOBAL AppEXEx10 := AppExe010
+;;;;  
+;;;;  
+IniRead, AppDir011, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherDirectory011, UNDEFINED_011
+GLOBAL AppDIRx11 := AppDir011
+IniRead, AppExe011, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherExecutable011, UNDEFINED_011
+GLOBAL AppEXEx11 := AppExe011
+;;;;  
+;;;;  
+IniRead, AppDir012, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherDirectory012, UNDEFINED_012
+GLOBAL AppDIRx12 := AppDir012
+IniRead, AppExe012, %A_ScriptDir%\%CONFIGFile%, LAUNCHER, LauncherExecutable012, UNDEFINED_012
+GLOBAL AppEXEx12 := AppExe012
+;;;;  
+;;;;  
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+If(AppSwitchx01="1")
+{
+    SetTimer, APPEvent001, -550
+}
+If(AppSwitchx02="1")
+{
+    SetTimer, APPEvent002, -570
+}
+If(AppSwitchx03="1")
+{
+    SetTimer, APPEvent003, -590
+}
+If(AppSwitchx04="1")
+{
+    SetTimer, APPEvent004, -610
+}
+If(AppSwitchx05="1")
+{
+    SetTimer, APPEvent005, -630
+}
+If(AppSwitchx06="1")
+{
+    SetTimer, APPEvent006, -650
+}
+If(AppSwitchx07="1")
+{
+    SetTimer, APPEvent007, -670
+}
+If(AppSwitchx08="1")
+{
+    SetTimer, APPEvent008, -690
+}
+If(AppSwitchx09="1")
+{
+    SetTimer, APPEvent009, -710
+}
+If(AppSwitchx10="1")
+{
+    SetTimer, APPEvent010, -730
+}
+If(AppSwitchx11="1")
+{
+    SetTimer, APPEvent011, -750
+}
+If(AppSwitchx12="1")
+{
+    SetTimer, APPEvent012, -770
+}
+
+Sleep, 1500
+
+
+ExitApp
+Return
+Return
+Return
+
+
+APPEvent001:
+If(AppDIRx01="UNDEFINED_001")
+{
+}
+Else
+    {
+    Run, %AppDIRx01%\%AppEXEx01%
+    }
+Return
+
+
+APPEvent002:
+If(AppDIRx02="UNDEFINED_002")
+{
+}
+Else
+    {
+    Run, %AppDIRx02%\%AppEXEx02%
+    }
+Return
+
+
+APPEvent003:
+If(AppDIRx03="UNDEFINED_003")
+{
+}
+Else
+    {
+    Run, %AppDIRx03%\%AppEXEx03%
+    }
+Return
+
+
+APPEvent004:
+If(AppDIRx04="UNDEFINED_004")
+{
+}
+Else
+    {
+    Run, %AppDIRx04%\%AppEXEx04%
+    }
+Return
+
+
+APPEvent005:
+If(AppDIRx05="UNDEFINED_005")
+{
+}
+Else
+    {
+    Run, %AppDIRx05%\%AppEXEx05%
+    }
+Return
+
+
+APPEvent006:
+If(AppDIRx06="UNDEFINED_006")
+{
+}
+Else
+    {
+    Run, %AppDIRx06%\%AppEXEx06%
+    }
+Return
+
+
+APPEvent007:
+If(AppDIRx07="UNDEFINED_007")
+{
+}
+Else
+    {
+    Run, %AppDIRx07%\%AppEXEx07%
+    }
+Return
+
+
+APPEvent008:
+If(AppDIRx08="UNDEFINED_008")
+{
+}
+Else
+    {
+    Run, %AppDIRx08%\%AppEXEx08%
+    }
+Return
+
+
+APPEvent009:
+If(AppDIRx09="UNDEFINED_009")
+{
+}
+Else
+    {
+    Run, %AppDIRx09%\%AppEXEx09%
+    }
+Return
+
+
+APPEvent010:
+If(AppDIRx10="UNDEFINED_010")
+{
+}
+Else
+    {
+    Run, %AppDIRx10%\%AppEXEx10%
+    }
+Return
+
+
+APPEvent011:
+If(AppDIRx11="UNDEFINED_011")
+{
+}
+Else
+    {
+    Run, %AppDIRx11%\%AppEXEx11%
+    }
+Return
+
+
+APPEvent012:
+If(AppDIRx12="UNDEFINED_012")
+{
+}
+Else
+    {
+    Run, %AppDIRx12%\%AppEXEx12%
+    }
+Return
