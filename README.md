@@ -4,7 +4,7 @@ This is a Windows launcher system that you can set to run on Logon with a task s
 <br>
 Inside 'winlauncher.cfg', enable a launcher target by turning the desired one ON in the '[LAUNCH_SWITCHES]' section.
 <br>
-Example:<br> Change 'App001=0' TO 'App001=1'  (Without quotes or apostrophes). This turns App Target 001 to ON
+Example:<br> Change 'App001=0' TO 'App001=1'  (Without quotes or apostrophes). This turns App Target 001 to ON.
 <br>
 <br>
 Then under the '[LAUNCH_DELAYS]' section, configure the number of miliseconds you want the desired target to execute after.
