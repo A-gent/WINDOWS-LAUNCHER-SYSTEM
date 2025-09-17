@@ -12,15 +12,25 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;;;
 ;;; https://www.autohotkey.com/boards/viewtopic.php?p=9186#p9186
 
+GLOBAL config_title := "winlauncher.cfg"
+GLOBAL config_file_combo := A_ScriptDir . "\" . config_title
+; GLOBAL config_file_combo := "winlauncher.cfg"    ;;; DON'T USE THIS VERSION BECAUSE ALL CALLS ARE NOW STATED FROM NON-LITERAL ABOVE
 
-GLOBAL config_file := A_ScriptDir . "\winlauncher.cfg"
+
 GLOBAL AppTitleRoot := "Windows Program AutoLauncher"
 
 GLOBAL SetToRunWithWindowsToggleFlag := "0"
+GLOBAL AutoSetToRunWithWindowsToggleFlag := "0"
 
 
-GLOBAL engine_title := "Auto-WinLauncher"
+GLOBAL engine_title := "WinLogon Auto-Launcher"
 GLOBAL engine_title_suffix := "(OnLogon Program Launcher)"
+
+GLOBAL engine_version := "v.1.0307"
+GLOBAL engine_build := "22H2"
+
+;; 2024 VERSION
+; GLOBAL engine_version := "v.1.0107"
 
 
 Menu, Tray, Tip, %AppTitleRoot%
@@ -37,10 +47,29 @@ Menu, Tray, Add, Exit, TrayBTN_EXIT   ; Creates a new menu item.
 Sleep, 500
 
 
-IniRead, UACElev, %A_ScriptDir%\%config_file%, SWITCHES, RunWithAdmin, 1
+IniRead, bAppSwitchDebugConfigFile, %engine_title%, SYSTEM, DisplayUnableToReadConfigError, 1
+GLOBAL AppSwitchDebugConfigFile := bAppSwitchDebugConfigFile
+
+IniRead, UACElev, %config_file_combo%, SYSTEM, RunWithAdmin, UNABLE_TO_READ_CONFIG
 GLOBAL UACElevate := UACElev
 Sleep, 500
-GLOBAL UACElevate := "1"
+; GLOBAL UACElevate := "1"     ;;;  FORCE ADMIN ELEVATE
+If(UACElevate="UNABLE_TO_READ_CONFIG")
+{
+    If(AppSwitchDebugConfigFile="1")
+    {
+    MsgBox, 4, %engine_title% - ERROR, UNABLE TO READ CONFIG FILE AT STARTUP PHASE.`nThis means all settings will take hard-coded defaults and the system will not work correctly.`n`nThis can happen if the winlauncher.cfg file is not in the folder with the application OR you are trying to run the application from a protected part of the system (C:) drive.`n`nDo you want to try to re-run the script with administrator rights in order to see if that will fix it (YES) or simply exit (NO)?`n`nIf you say yes but this error still appears then make sure the config file is inside the folder.
+        IfMsgBox, No
+        {
+            ExitApp
+        }
+        IfMsgBox, Yes
+        {
+            GLOBAL UACElevate := "1"
+        }
+    }
+}
+
 
 If(UACElevate="1")
 {
@@ -67,48 +96,89 @@ if not (A_IsAdmin or RegExMatch(full_command_line, " /restart(?!\S)"))
 
 
 
+IniRead, bAutoStartupSetupOnFirstRun, %config_file_combo%, AUTOSTARTUP_ONLOGON, AutoStartupSetupOnFirstRun, 1
+GLOBAL AutoStartupSetupOnFirstRun := bAutoStartupSetupOnFirstRun
+
+IniRead, aAutoStartupSetupOnFirstRunDelay, %config_file_combo%, AUTOSTARTUP_ONLOGON, AutoStartupSetupOnFirstRunDelay, 1
+GLOBAL bAutoStartupSetupOnFirstRunDelay := aAutoStartupSetupOnFirstRunDelay . "000"
+GLOBAL AutoStartupSetupOnFirstRunDelay := "-" . bAutoStartupSetupOnFirstRunDelay   ;;;; ensure this timer is not repeated by auto-appending a minus to the start
+
+IniRead, bAutoStartupSetupHasRun, %config_file_combo%, AUTOSTARTUP_ONLOGON, AutoStartupSetupHasRun, TRUE
+GLOBAL AutoStartupSetupHasRun := bAutoStartupSetupHasRun
+
+
+
+If(AutoStartupSetupOnFirstRun="1")
+{
+    If(AutoStartupSetupHasRun="FALSE")
+    {
+        SetTimer, AutoSetToRunWithWindowsMAIN, %AutoStartupSetupOnFirstRunDelay%
+        IniWrite, TRUE, %config_file_combo%, AUTOSTARTUP_ONLOGON, AutoStartupSetupHasRun
+        GLOBAL AutoStartupSetupHasRun := "TRUE"
+    }
+}
+
+
+
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;  
 ;;;;  
-IniRead, StartDelay, %A_ScriptDir%\%config_file%, DELAYS, StartupDelay, 6000
-GLOBAL StartupDelay := StartDelay
-;;;;  
-;;;;  
-IniRead, AppSwitch001, %A_ScriptDir%\%config_file%, SWITCHES, App001, 0
+IniRead, AppSwitch001, %config_file_combo%, LAUNCH_SWITCHES, App001, 0
 GLOBAL AppSwitchx01 := AppSwitch001
 ;;;;  
-IniRead, AppSwitch002, %A_ScriptDir%\%config_file%, SWITCHES, App002, 0
+IniRead, AppSwitch002, %config_file_combo%, LAUNCH_SWITCHES, App002, 0
 GLOBAL AppSwitchx02 := AppSwitch002
 ;;;;  
-IniRead, AppSwitch003, %A_ScriptDir%\%config_file%, SWITCHES, App003, 0
+IniRead, AppSwitch003, %config_file_combo%, LAUNCH_SWITCHES, App003, 0
 GLOBAL AppSwitchx03 := AppSwitch003
 ;;;;  
-IniRead, AppSwitch004, %A_ScriptDir%\%config_file%, SWITCHES, App004, 0
+IniRead, AppSwitch004, %config_file_combo%, LAUNCH_SWITCHES, App004, 0
 GLOBAL AppSwitchx04 := AppSwitch004
 ;;;;  
-IniRead, AppSwitch005, %A_ScriptDir%\%config_file%, SWITCHES, App005, 0
+IniRead, AppSwitch005, %config_file_combo%, LAUNCH_SWITCHES, App005, 0
 GLOBAL AppSwitchx05 := AppSwitch005
 ;;;;  
-IniRead, AppSwitch006, %A_ScriptDir%\%config_file%, SWITCHES, App006, 0
+IniRead, AppSwitch006, %config_file_combo%, LAUNCH_SWITCHES, App006, 0
 GLOBAL AppSwitchx06 := AppSwitch006
 ;;;;  
-IniRead, AppSwitch007, %A_ScriptDir%\%config_file%, SWITCHES, App007, 0
+IniRead, AppSwitch007, %config_file_combo%, LAUNCH_SWITCHES, App007, 0
 GLOBAL AppSwitchx07 := AppSwitch007
 ;;;;  
-IniRead, AppSwitch008, %A_ScriptDir%\%config_file%, SWITCHES, App008, 0
+IniRead, AppSwitch008, %config_file_combo%, LAUNCH_SWITCHES, App008, 0
 GLOBAL AppSwitchx08 := AppSwitch008
 ;;;;  
-IniRead, AppSwitch009, %A_ScriptDir%\%config_file%, SWITCHES, App009, 0
+IniRead, AppSwitch009, %config_file_combo%, LAUNCH_SWITCHES, App009, 0
 GLOBAL AppSwitchx09 := AppSwitch009
 ;;;;  
-IniRead, AppSwitch010, %A_ScriptDir%\%config_file%, SWITCHES, App010, 0
+IniRead, AppSwitch010, %config_file_combo%, LAUNCH_SWITCHES, App010, 0
 GLOBAL AppSwitchx10 := AppSwitch010
 ;;;;  
+IniRead, AppSwitch011, %config_file_combo%, LAUNCH_SWITCHES, App011, 0
+GLOBAL AppSwitchx11 := AppSwitch011
 ;;;;  
-IniRead, AppSwitchDBG, %A_ScriptDir%\%config_file%, SWITCHES, DisplayErrors, 0
+IniRead, AppSwitch012, %config_file_combo%, LAUNCH_SWITCHES, App012, 0
+GLOBAL AppSwitchx12 := AppSwitch012
+;;;;  
+IniRead, AppSwitch013, %config_file_combo%, LAUNCH_SWITCHES, App013, 0
+GLOBAL AppSwitchx13 := AppSwitch013
+;;;;  
+IniRead, AppSwitch014, %config_file_combo%, LAUNCH_SWITCHES, App014, 0
+GLOBAL AppSwitchx14 := AppSwitch014
+;;;;  
+IniRead, AppSwitch015, %config_file_combo%, LAUNCH_SWITCHES, App015, 0
+GLOBAL AppSwitchx15 := AppSwitch015
+;;;;  
+;;;;  
+;;;;  
+;;;;  
+;;;;  
+IniRead, AppSwitchDBG, %config_file_combo%, SYSTEM, DisplayErrors, 0
 GLOBAL AppSwitchDebug := AppSwitchDBG
 ;;;;  
 ;;;;  
@@ -118,77 +188,95 @@ GLOBAL AppSwitchDebug := AppSwitchDBG
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;  
 ;;;;  1
-IniRead, AppDir001, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherDirectory001, UNDEFINED_001
+IniRead, AppDir001, %config_file_combo%, LAUNCH_TARGETS, LauncherDirectory001, UNDEFINED_001
 GLOBAL AppDIRx01 := AppDir001
-IniRead, AppExe001, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherExecutable001, UNDEFINED_001
+IniRead, AppExe001, %config_file_combo%, LAUNCH_TARGETS, LauncherExecutable001, UNDEFINED_001
 GLOBAL AppEXEx01 := AppExe001
 ;;;;  
 ;;;;  2
-IniRead, AppDir002, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherDirectory002, UNDEFINED_002
+IniRead, AppDir002, %config_file_combo%, LAUNCH_TARGETS, LauncherDirectory002, UNDEFINED_002
 GLOBAL AppDIRx02 := AppDir002
-IniRead, AppExe002, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherExecutable002, UNDEFINED_002
+IniRead, AppExe002, %config_file_combo%, LAUNCH_TARGETS, LauncherExecutable002, UNDEFINED_002
 GLOBAL AppEXEx02 := AppExe002
 ;;;;  
 ;;;;  3
-IniRead, AppDir003, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherDirectory003, UNDEFINED_003
+IniRead, AppDir003, %config_file_combo%, LAUNCH_TARGETS, LauncherDirectory003, UNDEFINED_003
 GLOBAL AppDIRx03 := AppDir003
-IniRead, AppExe003, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherExecutable003, UNDEFINED_003
+IniRead, AppExe003, %config_file_combo%, LAUNCH_TARGETS, LauncherExecutable003, UNDEFINED_003
 GLOBAL AppEXEx03 := AppExe003
 ;;;;  
 ;;;;  4
-IniRead, AppDir004, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherDirectory004, UNDEFINED_004
+IniRead, AppDir004, %config_file_combo%, LAUNCH_TARGETS, LauncherDirectory004, UNDEFINED_004
 GLOBAL AppDIRx04 := AppDir004
-IniRead, AppExe004, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherExecutable004, UNDEFINED_004
+IniRead, AppExe004, %config_file_combo%, LAUNCH_TARGETS, LauncherExecutable004, UNDEFINED_004
 GLOBAL AppEXEx04 := AppExe004
 ;;;;  
 ;;;;  5
-IniRead, AppDir005, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherDirectory005, UNDEFINED_005
+IniRead, AppDir005, %config_file_combo%, LAUNCH_TARGETS, LauncherDirectory005, UNDEFINED_005
 GLOBAL AppDIRx05 := AppDir005
-IniRead, AppExe005, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherExecutable005, UNDEFINED_005
+IniRead, AppExe005, %config_file_combo%, LAUNCH_TARGETS, LauncherExecutable005, UNDEFINED_005
 GLOBAL AppEXEx05 := AppExe005
 ;;;;  
 ;;;;  6
-IniRead, AppDir006, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherDirectory006, UNDEFINED_006
+IniRead, AppDir006, %config_file_combo%, LAUNCH_TARGETS, LauncherDirectory006, UNDEFINED_006
 GLOBAL AppDIRx06 := AppDir006
-IniRead, AppExe006, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherExecutable006, UNDEFINED_006
+IniRead, AppExe006, %config_file_combo%, LAUNCH_TARGETS, LauncherExecutable006, UNDEFINED_006
 GLOBAL AppEXEx06 := AppExe006
 ;;;;  
 ;;;;  7
-IniRead, AppDir007, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherDirectory007, UNDEFINED_007
+IniRead, AppDir007, %config_file_combo%, LAUNCH_TARGETS, LauncherDirectory007, UNDEFINED_007
 GLOBAL AppDIRx07 := AppDir007
-IniRead, AppExe007, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherExecutable007, UNDEFINED_007
+IniRead, AppExe007, %config_file_combo%, LAUNCH_TARGETS, LauncherExecutable007, UNDEFINED_007
 GLOBAL AppEXEx07 := AppExe007
 ;;;;  
 ;;;;  8
-IniRead, AppDir008, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherDirectory008, UNDEFINED_008
+IniRead, AppDir008, %config_file_combo%, LAUNCH_TARGETS, LauncherDirectory008, UNDEFINED_008
 GLOBAL AppDIRx08 := AppDir008
-IniRead, AppExe008, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherExecutable008, UNDEFINED_008
+IniRead, AppExe008, %config_file_combo%, LAUNCH_TARGETS, LauncherExecutable008, UNDEFINED_008
 GLOBAL AppEXEx08 := AppExe008
 ;;;;  
 ;;;;  9
-IniRead, AppDir009, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherDirectory009, UNDEFINED_009
+IniRead, AppDir009, %config_file_combo%, LAUNCH_TARGETS, LauncherDirectory009, UNDEFINED_009
 GLOBAL AppDIRx09 := AppDir009
-IniRead, AppExe009, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherExecutable009, UNDEFINED_009
+IniRead, AppExe009, %config_file_combo%, LAUNCH_TARGETS, LauncherExecutable009, UNDEFINED_009
 GLOBAL AppEXEx09 := AppExe009
 ;;;;  
 ;;;;  10
-IniRead, AppDir010, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherDirectory010, UNDEFINED_010
+IniRead, AppDir010, %config_file_combo%, LAUNCH_TARGETS, LauncherDirectory010, UNDEFINED_010
 GLOBAL AppDIRx10 := AppDir010
-IniRead, AppExe010, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherExecutable010, UNDEFINED_010
+IniRead, AppExe010, %config_file_combo%, LAUNCH_TARGETS, LauncherExecutable010, UNDEFINED_010
 GLOBAL AppEXEx10 := AppExe010
 ;;;;  
 ;;;;  11
-IniRead, AppDir011, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherDirectory011, UNDEFINED_011
+IniRead, AppDir011, %config_file_combo%, LAUNCH_TARGETS, LauncherDirectory011, UNDEFINED_011
 GLOBAL AppDIRx11 := AppDir011
-IniRead, AppExe011, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherExecutable011, UNDEFINED_011
+IniRead, AppExe011, %config_file_combo%, LAUNCH_TARGETS, LauncherExecutable011, UNDEFINED_011
 GLOBAL AppEXEx11 := AppExe011
 ;;;;  
 ;;;;  12
-IniRead, AppDir012, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherDirectory012, UNDEFINED_012
+IniRead, AppDir012, %config_file_combo%, LAUNCH_TARGETS, LauncherDirectory012, UNDEFINED_012
 GLOBAL AppDIRx12 := AppDir012
-IniRead, AppExe012, %A_ScriptDir%\%config_file%, LAUNCHER, LauncherExecutable012, UNDEFINED_012
+IniRead, AppExe012, %config_file_combo%, LAUNCH_TARGETS, LauncherExecutable012, UNDEFINED_012
 GLOBAL AppEXEx12 := AppExe012
 ;;;;  
+;;;;  13
+IniRead, AppDir013, %config_file_combo%, LAUNCH_TARGETS, LauncherDirectory013, UNDEFINED_013
+GLOBAL AppDIRx13 := AppDir013
+IniRead, AppExe013, %config_file_combo%, LAUNCH_TARGETS, LauncherExecutable013, UNDEFINED_013
+GLOBAL AppEXEx13 := AppExe013
+;;;;  
+;;;;  14
+IniRead, AppDir014, %config_file_combo%, LAUNCH_TARGETS, LauncherDirectory014, UNDEFINED_014
+GLOBAL AppDIRx14 := AppDir014
+IniRead, AppExe014, %config_file_combo%, LAUNCH_TARGETS, LauncherExecutable012, UNDEFINED_014
+GLOBAL AppEXEx14 := AppExe014
+;;;;  
+;;;;  15
+IniRead, AppDir015, %config_file_combo%, LAUNCH_TARGETS, LauncherDirectory015, UNDEFINED_015
+GLOBAL AppDIRx15 := AppDir015
+IniRead, AppExe015, %config_file_combo%, LAUNCH_TARGETS, LauncherExecutable015, UNDEFINED_015
+GLOBAL AppEXEx15 := AppExe015
+;;;;  
 ;;;;  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -196,22 +284,30 @@ GLOBAL AppEXEx12 := AppExe012
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+;;;;  
+;;;;  
+IniRead, StartDelay, %config_file_combo%, SYSTEM, StartupDelay, 6000
+GLOBAL StartupDelay := StartDelay
 
 Sleep, %StartupDelay%
 
 
-IniRead, App1Delay, %A_ScriptDir%\%config_file%, DELAYS, App001, -550
-IniRead, App2Delay, %A_ScriptDir%\%config_file%, DELAYS, App002, -570
-IniRead, App3Delay, %A_ScriptDir%\%config_file%, DELAYS, App003, -590
-IniRead, App4Delay, %A_ScriptDir%\%config_file%, DELAYS, App004, -610
-IniRead, App5Delay, %A_ScriptDir%\%config_file%, DELAYS, App005, -630
-IniRead, App6Delay, %A_ScriptDir%\%config_file%, DELAYS, App006, -650
-IniRead, App7Delay, %A_ScriptDir%\%config_file%, DELAYS, App007, -670
-IniRead, App8Delay, %A_ScriptDir%\%config_file%, DELAYS, App008, -690
-IniRead, App9Delay, %A_ScriptDir%\%config_file%, DELAYS, App009, -710
-IniRead, App10Delay, %A_ScriptDir%\%config_file%, DELAYS, App010, -730
-IniRead, App11Delay, %A_ScriptDir%\%config_file%, DELAYS, App011, -750
-IniRead, App12Delay, %A_ScriptDir%\%config_file%, DELAYS, App012, -770
+
+IniRead, App1Delay, %config_file_combo%, LAUNCH_DELAYS, App001, -550
+IniRead, App2Delay, %config_file_combo%, LAUNCH_DELAYS, App002, -570
+IniRead, App3Delay, %config_file_combo%, LAUNCH_DELAYS, App003, -590
+IniRead, App4Delay, %config_file_combo%, LAUNCH_DELAYS, App004, -610
+IniRead, App5Delay, %config_file_combo%, LAUNCH_DELAYS, App005, -630
+IniRead, App6Delay, %config_file_combo%, LAUNCH_DELAYS, App006, -650
+IniRead, App7Delay, %config_file_combo%, LAUNCH_DELAYS, App007, -670
+IniRead, App8Delay, %config_file_combo%, LAUNCH_DELAYS, App008, -690
+IniRead, App9Delay, %config_file_combo%, LAUNCH_DELAYS, App009, -710
+IniRead, App10Delay, %config_file_combo%, LAUNCH_DELAYS, App010, -730
+IniRead, App11Delay, %config_file_combo%, LAUNCH_DELAYS, App011, -750
+IniRead, App12Delay, %config_file_combo%, LAUNCH_DELAYS, App012, -760
+IniRead, App13Delay, %config_file_combo%, LAUNCH_DELAYS, App013, -770
+IniRead, App14Delay, %config_file_combo%, LAUNCH_DELAYS, App014, -770
+IniRead, App15Delay, %config_file_combo%, LAUNCH_DELAYS, App015, -770
 
 
 If(AppSwitchx01="1")
@@ -262,17 +358,29 @@ If(AppSwitchx12="1")
 {
     SetTimer, APPEvent012, %App12Delay%
 }
+If(AppSwitchx13="1")
+{
+    SetTimer, APPEvent013, %App13Delay%
+}
+If(AppSwitchx14="1")
+{
+    SetTimer, APPEvent014, %App14Delay%
+}
+If(AppSwitchx15="1")
+{
+    SetTimer, APPEvent015, %App15Delay%
+}
 
 Sleep, 1500
 
-IniRead, PDANetAutoCon, %A_ScriptDir%\%config_file%, SWITCHES, PDANetAuto, 0
+IniRead, PDANetAutoCon, %config_file_combo%, SYSTEM, PDANetAuto, 0
 GLOBAL PDANetAutoConnect := PDANetAutoCon
 
 If(PDANetAutoConnect="1")
 {
-IniRead, PDANetAutoDelay, %A_ScriptDir%\%config_file%, DELAYS, PDANetAutoDelay, 7000
-IniRead, PDANetDIR, %A_ScriptDir%\%config_file%, PDANet, Dir, C:\Program Files (x86)\PdaNet for Android
-IniRead, PDANetEXE, %A_ScriptDir%\%config_file%, PDANet, Exe, PdaNetPC.exe
+IniRead, PDANetAutoDelay, %config_file_combo%, SYSTEM, PDANetAutoDelay, 7000
+IniRead, PDANetDIR, %config_file_combo%, PDANet, Dir, C:\Program Files (x86)\PdaNet for Android
+IniRead, PDANetEXE, %config_file_combo%, PDANet, Exe, PdaNetPC.exe
 Process, Wait, PdaNetPC.exe
 Sleep, %PDANetAutoDelay%
 Run, %PDANetDIR%\%PDANetEXE%   ;;; this auto connects on second rerun
@@ -288,8 +396,10 @@ Run, %PDANetDIR%\%PDANetEXE%   ;;; this auto connects on second rerun
 
 
 
+IniRead, bSystemExitDelay, %config_file_combo%, SYSTEM, SystemExitDelay, 10000
+GLOBAL SystemExitDelay := bSystemExitDelay
 
-Sleep, 10000
+Sleep, %SystemExitDelay%
 ExitApp
 Return
 Return
@@ -301,14 +411,14 @@ If(AppDIRx01 ="UNDEFINED_001")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {001} Launch Enabled But Undefined (1)
+    MsgBox, , %engine_title%, App {001} Launch Enabled But Undefined (1)
     }
 }
 Else If(AppEXEx01="UNDEFINED_001")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {001} Launch Enabled But Undefined (2)
+    MsgBox, , %engine_title%, App {001} Launch Enabled But Undefined (2)
     }
 }
 Else
@@ -324,14 +434,14 @@ If(AppDIRx02 ="UNDEFINED_002")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {002} Launch Enabled But Undefined (1)
+    MsgBox, , %engine_title%, App {002} Launch Enabled But Undefined (1)
     }
 }
 Else If(AppEXEx02="UNDEFINED_002")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {002} Launch Enabled But Undefined (2)
+    MsgBox, , %engine_title%, App {002} Launch Enabled But Undefined (2)
     }
 }
 Else
@@ -347,14 +457,14 @@ If(AppDIRx03 ="UNDEFINED_003")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {003} Launch Enabled But Undefined (1)
+    MsgBox, , %engine_title%, App {003} Launch Enabled But Undefined (1)
     }
 }
 Else If(AppEXEx03="UNDEFINED_003")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {003} Launch Enabled But Undefined (2)
+    MsgBox, , %engine_title%, App {003} Launch Enabled But Undefined (2)
     }
 }
 Else
@@ -370,14 +480,14 @@ If(AppDIRx04="UNDEFINED_004")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {004} Launch Enabled But Undefined (1)
+    MsgBox, , %engine_title%, App {004} Launch Enabled But Undefined (1)
     }
 }
 Else If(AppEXEx04="UNDEFINED_004")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {004} Launch Enabled But Undefined (2)
+    MsgBox, , %engine_title%, App {004} Launch Enabled But Undefined (2)
     }
 }
 Else
@@ -393,14 +503,14 @@ If(AppDIRx05="UNDEFINED_005")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {005} Launch Enabled But Undefined (1)
+    MsgBox, , %engine_title%, App {005} Launch Enabled But Undefined (1)
     }
 }
 Else If(AppEXEx05="UNDEFINED_005")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {005} Launch Enabled But Undefined (2)
+    MsgBox, , %engine_title%, App {005} Launch Enabled But Undefined (2)
     }
 }
 Else
@@ -416,14 +526,14 @@ If(AppDIRx06="UNDEFINED_006")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {006} Launch Enabled But Undefined (1)
+    MsgBox, , %engine_title%, App {006} Launch Enabled But Undefined (1)
     }
 }
 Else If(AppEXEx06="UNDEFINED_006")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {006} Launch Enabled But Undefined (2)
+    MsgBox, , %engine_title%, App {006} Launch Enabled But Undefined (2)
     }
 }
 Else
@@ -439,14 +549,14 @@ If(AppDIRx07="UNDEFINED_007")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {007} Launch Enabled But Undefined (1)
+    MsgBox, , %engine_title%, App {007} Launch Enabled But Undefined (1)
     }
 }
 Else If(AppEXEx07="UNDEFINED_007")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {007} Launch Enabled But Undefined (2)
+    MsgBox, , %engine_title%, App {007} Launch Enabled But Undefined (2)
     }
 }
 Else
@@ -462,14 +572,14 @@ If(AppDIRx08="UNDEFINED_008")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {008} Launch Enabled But Undefined (1)
+    MsgBox, , %engine_title%, App {008} Launch Enabled But Undefined (1)
     }
 }
 Else If(AppEXEx08="UNDEFINED_008")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {008} Launch Enabled But Undefined (2)
+    MsgBox, , %engine_title%, App {008} Launch Enabled But Undefined (2)
     }
 }
 Else
@@ -485,14 +595,14 @@ If(AppDIRx09="UNDEFINED_009")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {009} Launch Enabled But Undefined (1)
+    MsgBox, , %engine_title%, App {009} Launch Enabled But Undefined (1)
     }
 }
 Else If(AppEXEx09="UNDEFINED_009")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {009} Launch Enabled But Undefined (2)
+    MsgBox, , %engine_title%, App {009} Launch Enabled But Undefined (2)
     }
 }
 Else
@@ -508,14 +618,14 @@ If(AppDIRx10="UNDEFINED_010")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {010} Launch Enabled But Undefined (1)
+    MsgBox, , %engine_title%, App {010} Launch Enabled But Undefined (1)
     }
 }
 Else If(AppEXEx10="UNDEFINED_010")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {010} Launch Enabled But Undefined (2)
+    MsgBox, , %engine_title%, App {010} Launch Enabled But Undefined (2)
     }
 }
 Else
@@ -531,14 +641,14 @@ If(AppDIRx11="UNDEFINED_011")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {011} Launch Enabled But Undefined (1)
+    MsgBox, , %engine_title%, App {011} Launch Enabled But Undefined (1)
     }
 }
 Else If(AppEXEx11="UNDEFINED_011")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {011} Launch Enabled But Undefined (2)
+    MsgBox, , %engine_title%, App {011} Launch Enabled But Undefined (2)
     }
 }
 Else
@@ -554,14 +664,14 @@ If(AppDIRx12="UNDEFINED_012")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {012} Launch Enabled But Undefined (1)
+    MsgBox, , %engine_title%, App {012} Launch Enabled But Undefined (1)
     }
 }
 Else If(AppEXEx12="UNDEFINED_012")
 {
     If(AppSwitchDebug="1")
     {
-    MsgBox, , WinLaunch 2024, App {012} Launch Enabled But Undefined (2)
+    MsgBox, , %engine_title%, App {012} Launch Enabled But Undefined (2)
     }
 }
 Else
@@ -572,6 +682,72 @@ Return
 
 
 
+APPEvent013:
+If(AppDIRx13="UNDEFINED_013")
+{
+    If(AppSwitchDebug="1")
+    {
+    MsgBox, , %engine_title%, App {013} Launch Enabled But Undefined (1)
+    }
+}
+Else If(AppEXEx13="UNDEFINED_013")
+{
+    If(AppSwitchDebug="1")
+    {
+    MsgBox, , %engine_title%, App {013} Launch Enabled But Undefined (2)
+    }
+}
+Else
+    {
+        Run, %AppDIRx13%\%AppEXEx13%
+    }
+Return
+
+
+
+APPEvent014:
+If(AppDIRx14="UNDEFINED_014")
+{
+    If(AppSwitchDebug="1")
+    {
+    MsgBox, , %engine_title%, App {014} Launch Enabled But Undefined (1)
+    }
+}
+Else If(AppEXEx14="UNDEFINED_014")
+{
+    If(AppSwitchDebug="1")
+    {
+    MsgBox, , %engine_title%, App {014} Launch Enabled But Undefined (2)
+    }
+}
+Else
+    {
+        Run, %AppDIRx14%\%AppEXEx14%
+    }
+Return
+
+
+
+APPEvent015:
+If(AppDIRx15="UNDEFINED_015")
+{
+    If(AppSwitchDebug="1")
+    {
+    MsgBox, , %engine_title%, App {015} Launch Enabled But Undefined (1)
+    }
+}
+Else If(AppEXEx15="UNDEFINED_015")
+{
+    If(AppSwitchDebug="1")
+    {
+    MsgBox, , %engine_title%, App {015} Launch Enabled But Undefined (2)
+    }
+}
+Else
+    {
+        Run, %AppDIRx15%\%AppEXEx15%
+    }
+Return
 
 
 
@@ -598,12 +774,12 @@ Return
 
 
 TrayBTN_SETTINGS:
-Run, "notepad.exe" %config_file%
+Run, "notepad.exe" "%config_file_combo%"
 Return
 
 
 TrayBTN_CONTAINER:
-Run, "explorer.exe" %A_ScriptDir%
+Run, "explorer.exe" "%A_ScriptDir%"
 Return
 
 
@@ -673,11 +849,13 @@ Return
 
 TrayBTN_SetToRunWithWindowsMAIN:
 GLOBAL CurrentScriptFile := A_ScriptName
-IniRead, bUACElevate, %config_file%, DEBUG, RunAsAdministrator, 0
-GLOBAL UACElevate := bUACElevate
+; IniRead, bUACElevate, %config_file_combo%, DEBUG, RunAsAdministrator, 0
+; GLOBAL UACElevate := bUACElevate
+IniRead, UACElev, %config_file_combo%, SYSTEM, RunWithAdmin, 1
+GLOBAL UACElevate := UACElev
 
-; GLOBAL RunQueueAegisContainer := A_ScriptDir . "\" . A_ScriptName
-GLOBAL RunQueueAegisContainer := "'" . A_ScriptDir . "\" . A_ScriptName . "'"
+; GLOBAL RunEngineContainer := A_ScriptDir . "\" . A_ScriptName
+GLOBAL RunEngineContainer := "'" . A_ScriptDir . "\" . A_ScriptName . "'"
 
 
 
@@ -749,17 +927,17 @@ Return
 
 
 TrayBTN_SetToRunWithWindowsON:
-GLOBAL UACElevate := "1"
+; GLOBAL UACElevate := "1"    ;;;  FORCE ADMIN ELEVATE
 
 If(UACElevate="0")
 {
-  Run, schtasks.exe /create /TN "Core_WindowsLauncherOnStartup" /TR "%RunQueueAegisContainer%" /sc ONLOGON /RU "%A_ComputerName%\%A_UserName%" /RL LIMITED /F
+  Run, schtasks.exe /create /TN "Core_WindowsLauncherOnStartup" /TR "%RunEngineContainer%" /sc ONLOGON /RU "%A_ComputerName%\%A_UserName%" /RL LIMITED /F
   MsgBox,, [%engine_title%]  Auto-Start With Windows, Successfully Enabled Auto-Starting %engine_title% With Windows (LIMITED).
   Return
 }
 If(UACElevate="1")
 {
-  Run, schtasks.exe /create /TN "Core_WindowsLauncherOnStartup" /TR "%RunQueueAegisContainer%" /sc ONLOGON /RU "%A_ComputerName%\%A_UserName%" /RL HIGHEST /F
+  Run, schtasks.exe /create /TN "Core_WindowsLauncherOnStartup" /TR "%RunEngineContainer%" /sc ONLOGON /RU "%A_ComputerName%\%A_UserName%" /RL HIGHEST /F
   MsgBox,, [%engine_title%]  Auto-Start With Windows, Successfully Enabled Auto-Starting %engine_title% With Windows (HIGHEST).
   Return
 }
@@ -769,6 +947,146 @@ TrayBTN_SetToRunWithWindowsOFF:
   Run, schtasks.exe /delete /TN "Core_WindowsLauncherOnStartup" /F
   MsgBox,, [%engine_title%]  Auto-Start With Windows, Successfully Disabled Auto-Starting {%engine_title%} With Windows.
 Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+AutoSetToRunWithWindowsMAIN:
+GLOBAL CurrentScriptFile := A_ScriptName
+IniRead, UACElev, %config_file_combo%, SYSTEM, RunWithAdmin, 1
+GLOBAL UACElevate := UACElev
+
+; GLOBAL RunEngineContainer := A_ScriptDir . "\" . A_ScriptName
+GLOBAL RunEngineContainer := "'" . A_ScriptDir . "\" . A_ScriptName . "'"
+
+
+
+GLOBAL taskName := "Core_WindowsLauncherOnStartup" ; Replace with the actual task name
+GLOBAL taskCheckerCreate := "VerifyDota2QueueAegisTaskExists.txt"
+GLOBAL taskChecker := "VerifyWindowsLauncherTaskExists.ps1"
+
+GLOBAL PowerShellVerifyCommand := "powershell.exe -Command Get-ScheduledTask" . A_Space . taskName
+
+Path_To_File = "%A_Temp%\%taskChecker%"
+
+If FileExist(A_Temp . "\" . taskChecker)
+{
+	; MsgBox,, Title, VerifyTask2.ps1 EXISTS ALREADY!
+}
+Else
+{
+	; MsgBox,, Title, VerifyTask2.ps1 DOES NOT EXISTS ALREADY!
+	FileAppend, %PowerShellVerifyCommand%, %A_Temp%\%taskCheckerCreate%
+	If(ErrorLevel="1")
+	{
+		;;; CATCH ERRORS AND ALSO WAIT FOR EXECUTION TO FINISH TO ENSURE WE ONLY TRY TO RENAME AFTER ITS DONE
+		; MsgBox,, Title, BUILD VerifyTask2.txt had an error trying to write the file needed to check if the task exists
+	}
+	Else
+	{
+		;;; CATCH ERRORS AND ALSO WAIT FOR EXECUTION TO FINISH TO ENSURE WE ONLY TRY TO RENAME AFTER ITS DONE
+		; MsgBox,, Title, BUILD VerifyTask2.txt finished successfully!
+		;;; RENAME THE FILE FROM A .TXT TO A .PS1 SINCE FILEAPPEND ISN'T ALLOWED TO MAKE A .PS1 FILE WITHOUT ADMIN
+		FileMove, %A_Temp%\%taskCheckerCreate%, %A_Temp%\%taskChecker%, 1
+	}
+}
+AutoSetToRunWithWindowsToggleFlag := JEE_RunGetStdOut("PowerShell.exe -ExecutionPolicy Bypass -File " Path_To_File)
+
+; MsgBox, , Title, %Path_To_File%
+
+        If(AutoSetToRunWithWindowsToggleFlag="" && "null")
+        {
+            ; MsgBox, %engine_title% Is Currently Set To Auto-Start With Windows.
+            GLOBAL AutoSetToRunWithWindowsToggleFlag := "0"
+          ; Return
+        }
+        else
+        {
+          ; MsgBox, %engine_title% Is Currently NOT Set To Auto-Start With Windows.
+          GLOBAL AutoSetToRunWithWindowsToggleFlag := "1"
+          ; Return
+        }
+
+
+
+
+
+If(AutoSetToRunWithWindowsToggleFlag="0")
+{
+  GLOBAL AutoSetToRunWithWindowsToggleFlag := "1"
+  SetTimer, AutoSetToRunWithWindowsOFF, OFF
+  SetTimer, AutoSetToRunWithWindowsON, -150
+  Return
+}
+If(AutoSetToRunWithWindowsToggleFlag="1")
+{
+  GLOBAL AutoSetToRunWithWindowsToggleFlag := "0"
+  SetTimer, AutoSetToRunWithWindowsON, OFF
+  SetTimer, AutoSetToRunWithWindowsOFF, -150
+  Return
+}
+Return
+
+
+AutoSetToRunWithWindowsON:
+; GLOBAL UACElevate := "1"    ;;;  FORCE ADMIN ELEVATE
+
+If(UACElevate="0")
+{
+  Run, schtasks.exe /create /TN "Core_WindowsLauncherOnStartup" /TR "%RunEngineContainer%" /sc ONLOGON /RU "%A_ComputerName%\%A_UserName%" /RL LIMITED /F
+  MsgBox,, [%engine_title%]  Auto-Start With Windows On First Run, Successfully Enabled Auto-Starting %engine_title% With Windows (LIMITED).
+  Return
+}
+If(UACElevate="1")
+{
+  Run, schtasks.exe /create /TN "Core_WindowsLauncherOnStartup" /TR "%RunEngineContainer%" /sc ONLOGON /RU "%A_ComputerName%\%A_UserName%" /RL HIGHEST /F
+  MsgBox,, [%engine_title%]  Auto-Start With Windows On First Run, Successfully Enabled Auto-Starting %engine_title% With Windows (HIGHEST).
+  Return
+}
+Return
+
+AutoSetToRunWithWindowsOFF:
+  Run, schtasks.exe /delete /TN "Core_WindowsLauncherOnStartup" /F
+  MsgBox,, [%engine_title%]  Auto-Start With Windows On First Run, Successfully Disabled Auto-Starting {%engine_title%} With Windows.
+Return
+
+
+
+
+
+
 
 
 
@@ -829,19 +1147,69 @@ JEE_RunGetStdOut(vTarget, vSize:="")
 Return
 
 
+
+;;;; OLD FUNCTIONS INCLUDE FILE NOT CURRENTLY USED IN CURRENT EXECUTION PATTERNS
+; #Include, functions.toolkit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;;;;;;;;;;;;;;;   OLD EXAMPLE APPROACH
+
+
+
 ; APPEvent001:
 ; If(AppDIRx01 ="UNDEFINED_001")
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else If(AppEXEx01="UNDEFINED_001")
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else
@@ -857,14 +1225,14 @@ Return
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else If(AppEXEx02="UNDEFINED_002")
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else
@@ -880,14 +1248,14 @@ Return
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else If(AppEXEx03="UNDEFINED_003")
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else
@@ -903,14 +1271,14 @@ Return
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else If(AppEXEx04="UNDEFINED_004")
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else
@@ -926,14 +1294,14 @@ Return
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else If(AppEXEx05="UNDEFINED_005")
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else
@@ -949,14 +1317,14 @@ Return
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else If(AppEXEx06="UNDEFINED_006")
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else
@@ -972,14 +1340,14 @@ Return
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else If(AppEXEx07="UNDEFINED_007")
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else
@@ -995,14 +1363,14 @@ Return
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else If(AppEXEx08="UNDEFINED_008")
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else
@@ -1018,14 +1386,14 @@ Return
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else If(AppEXEx09="UNDEFINED_009")
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else
@@ -1041,14 +1409,14 @@ Return
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else If(AppEXEx10="UNDEFINED_010")
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else
@@ -1064,14 +1432,14 @@ Return
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else If(AppEXEx11="UNDEFINED_011")
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else
@@ -1087,14 +1455,14 @@ Return
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else If(AppEXEx12="UNDEFINED_012")
 ; {
 ;     If(AppSwitchDebug="1")
 ;     {
-;     ; MsgBox, , WinLaunch 2024, undefined called
+;     ; MsgBox, , %engine_title%, undefined called
 ;     }
 ; }
 ; Else
