@@ -14,6 +14,6 @@ Example: Change 'App001=550' TO 'App001=8000'  (Without quotes or apostrophes). 
 <br>
 Then under the '[LAUNCH_TARGETS]' section, configure the Executable and Directory for your desired program target.
 <br>
-Example (for foobar2000 music player which I use and have installed already):
+Example (for foobar2000 music player which I use and have installed already):<br>
 Change 'LauncherExecutable001=UNDEFINED_001' TO 'LauncherExecutable001=foobar2000.exe'  (Without quotes or apostrophes). This must be the exact name of the application file for your desired target program, including the .exe file extension!
 Change 'LauncherDirectory001=UNDEFINED_001' TO 'LauncherDirectory001=C:\Program Files (x86)\PdaNet for Android'  (Without quotes or apostrophes). This must be the exact directory of the application file for your desired target program, the folder that the above .exe file is inside of!
