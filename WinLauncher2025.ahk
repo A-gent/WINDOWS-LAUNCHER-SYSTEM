@@ -293,21 +293,36 @@ Sleep, %StartupDelay%
 
 
 
-IniRead, App1Delay, %config_file_combo%, LAUNCH_DELAYS, App001, -550
-IniRead, App2Delay, %config_file_combo%, LAUNCH_DELAYS, App002, -570
-IniRead, App3Delay, %config_file_combo%, LAUNCH_DELAYS, App003, -590
-IniRead, App4Delay, %config_file_combo%, LAUNCH_DELAYS, App004, -610
-IniRead, App5Delay, %config_file_combo%, LAUNCH_DELAYS, App005, -630
-IniRead, App6Delay, %config_file_combo%, LAUNCH_DELAYS, App006, -650
-IniRead, App7Delay, %config_file_combo%, LAUNCH_DELAYS, App007, -670
-IniRead, App8Delay, %config_file_combo%, LAUNCH_DELAYS, App008, -690
-IniRead, App9Delay, %config_file_combo%, LAUNCH_DELAYS, App009, -710
-IniRead, App10Delay, %config_file_combo%, LAUNCH_DELAYS, App010, -730
-IniRead, App11Delay, %config_file_combo%, LAUNCH_DELAYS, App011, -750
-IniRead, App12Delay, %config_file_combo%, LAUNCH_DELAYS, App012, -760
-IniRead, App13Delay, %config_file_combo%, LAUNCH_DELAYS, App013, -770
-IniRead, App14Delay, %config_file_combo%, LAUNCH_DELAYS, App014, -770
-IniRead, App15Delay, %config_file_combo%, LAUNCH_DELAYS, App015, -770
+IniRead, bApp1Delay, %config_file_combo%, LAUNCH_DELAYS, App001, -550
+GLOBAL App1Delay := "-" . bApp1Delay
+IniRead, bApp2Delay, %config_file_combo%, LAUNCH_DELAYS, App002, -570
+GLOBAL App2Delay := "-" . bApp2Delay
+IniRead, bApp3Delay, %config_file_combo%, LAUNCH_DELAYS, App003, -590
+GLOBAL App3Delay := "-" . bApp3Delay
+IniRead, bApp4Delay, %config_file_combo%, LAUNCH_DELAYS, App004, -610
+GLOBAL App4Delay := "-" . bApp4Delay
+IniRead, bApp5Delay, %config_file_combo%, LAUNCH_DELAYS, App005, -630
+GLOBAL App5Delay := "-" . bApp5Delay
+IniRead, bApp6Delay, %config_file_combo%, LAUNCH_DELAYS, App006, -650
+GLOBAL App6Delay := "-" . bApp6Delay
+IniRead, bApp7Delay, %config_file_combo%, LAUNCH_DELAYS, App007, -670
+GLOBAL App7Delay := "-" . bApp7Delay
+IniRead, bApp8Delay, %config_file_combo%, LAUNCH_DELAYS, App008, -690
+GLOBAL App8Delay := "-" . bApp8Delay
+IniRead, bApp9Delay, %config_file_combo%, LAUNCH_DELAYS, App009, -710
+GLOBAL App9Delay := "-" . bApp9Delay
+IniRead, bApp10Delay, %config_file_combo%, LAUNCH_DELAYS, App010, -730
+GLOBAL App10Delay := "-" . bApp10Delay
+IniRead, bApp11Delay, %config_file_combo%, LAUNCH_DELAYS, App011, -750
+GLOBAL App11Delay := "-" . bApp11Delay
+IniRead, bApp12Delay, %config_file_combo%, LAUNCH_DELAYS, App012, -760
+GLOBAL App12Delay := "-" . bApp12Delay
+IniRead, bApp13Delay, %config_file_combo%, LAUNCH_DELAYS, App013, -770
+GLOBAL App13Delay := "-" . bApp13Delay
+IniRead, bApp14Delay, %config_file_combo%, LAUNCH_DELAYS, App014, -780
+GLOBAL App14Delay := "-" . bApp14Delay
+IniRead, bApp15Delay, %config_file_combo%, LAUNCH_DELAYS, App015, -790
+GLOBAL App15Delay := "-" . bApp15Delay
 
 
 If(AppSwitchx01="1")
@@ -1062,7 +1077,8 @@ Return
 
 AutoSetToRunWithWindowsON:
 ; GLOBAL UACElevate := "1"    ;;;  FORCE ADMIN ELEVATE
-
+Run, schtasks.exe /delete /TN "Core_WindowsLauncherOnStartup" /F
+Sleep, 250
 If(UACElevate="0")
 {
   Run, schtasks.exe /create /TN "Core_WindowsLauncherOnStartup" /TR "%RunEngineContainer%" /sc ONLOGON /RU "%A_ComputerName%\%A_UserName%" /RL LIMITED /F
@@ -1079,7 +1095,20 @@ Return
 
 AutoSetToRunWithWindowsOFF:
   Run, schtasks.exe /delete /TN "Core_WindowsLauncherOnStartup" /F
-  MsgBox,, [%engine_title%]  Auto-Start With Windows On First Run, Successfully Disabled Auto-Starting {%engine_title%} With Windows.
+  Sleep 250
+;   MsgBox,, [%engine_title%]  Auto-Start With Windows On First Run, Successfully Disabled Auto-Starting {%engine_title%} With Windows.
+    If(UACElevate="0")
+    {
+    Run, schtasks.exe /create /TN "Core_WindowsLauncherOnStartup" /TR "%RunEngineContainer%" /sc ONLOGON /RU "%A_ComputerName%\%A_UserName%" /RL LIMITED /F
+    MsgBox,, [%engine_title%]  Auto-Start With Windows On First Run, Successfully Enabled Auto-Starting %engine_title% With Windows (LIMITED).
+    Return
+    }
+    If(UACElevate="1")
+    {
+    Run, schtasks.exe /create /TN "Core_WindowsLauncherOnStartup" /TR "%RunEngineContainer%" /sc ONLOGON /RU "%A_ComputerName%\%A_UserName%" /RL HIGHEST /F
+    MsgBox,, [%engine_title%]  Auto-Start With Windows On First Run, Successfully Enabled Auto-Starting %engine_title% With Windows (HIGHEST).
+    Return
+    }
 Return
 
 
